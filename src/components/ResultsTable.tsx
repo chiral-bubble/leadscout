@@ -865,8 +865,8 @@ export function ResultsTable({ leads, searchTitle, isMockData }: ResultsTablePro
                                   {lead.phone_e164}
                                 </div>
                               )}
-                              {!hasPhone && hasEmail && (
-                                <div className="text-[10px] font-mono text-indigo-600 mt-0.5 truncate max-w-[130px]">
+                              {hasEmail && (
+                                <div className="text-[10px] font-mono text-indigo-600 mt-0.5 truncate max-w-[150px]" title={audit!.contact_candidates.emails.join(', ')}>
                                   ✉ {audit!.contact_candidates.emails[0]}
                                 </div>
                               )}
