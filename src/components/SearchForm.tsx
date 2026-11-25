@@ -11,7 +11,7 @@ interface SearchFormProps {
     radiusMiles: number;
     maxResults: 20 | 50 | 100 | 250;
     onlyNoWebsite?: boolean;
-    provider?: 'osm' | 'companies_house';
+    provider?: 'osm' | 'fhrs' | 'companies_house';
   }) => Promise<void>;
   isLoading: boolean;
 }
@@ -45,7 +45,7 @@ export function SearchForm({ onSearch, isLoading }: SearchFormProps) {
   const [radiusMiles, setRadiusMiles] = useState(15);
   const [maxResults, setMaxResults] = useState<20 | 50 | 100 | 250>(50);
   const [onlyNoWebsite, setOnlyNoWebsite] = useState(false);
-  const [provider, setProvider] = useState<'osm' | 'companies_house'>('osm');
+  const [provider, setProvider] = useState<'osm' | 'fhrs' | 'companies_house'>('osm');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -230,12 +230,13 @@ export function SearchForm({ onSearch, isLoading }: SearchFormProps) {
             <div className="inline-flex bg-slate-100 p-0.5 rounded-lg border border-slate-200">
               {[
                 { id: 'osm', label: 'Free (OSM)' },
+                { id: 'fhrs', label: 'Food & Hospitality (UK Gov)' },
                 { id: 'companies_house', label: 'New Companies' },
               ].map((src) => (
                 <button
                   key={src.id}
                   type="button"
-                  onClick={() => setProvider(src.id as 'osm' | 'companies_house')}
+                  onClick={() => setProvider(src.id as 'osm' | 'fhrs' | 'companies_house')}
                   className={`px-2.5 py-1 rounded-md font-medium transition ${
                     provider === src.id
                       ? 'bg-indigo-600 text-white shadow-2xs'

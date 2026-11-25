@@ -59,7 +59,7 @@ export default function DiscoveryPage() {
     radiusMiles: number;
     maxResults: 20 | 50 | 100 | 250;
     onlyNoWebsite?: boolean;
-    provider?: 'osm' | 'companies_house';
+    provider?: 'osm' | 'fhrs' | 'companies_house';
   }) => {
     setIsLoading(true);
     setError(null);

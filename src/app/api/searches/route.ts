@@ -11,7 +11,7 @@ const SearchRequestSchema = z.object({
     .union([z.literal(20), z.literal(50), z.literal(100), z.literal(250), z.enum(['20', '50', '100', '250'])])
     .transform((v) => (typeof v === 'string' ? parseInt(v, 10) : v) as 20 | 50 | 100 | 250),
   onlyNoWebsite: z.boolean().optional().default(false),
-  provider: z.enum(['osm', 'companies_house']).optional(),
+  provider: z.enum(['osm', 'fhrs', 'companies_house']).optional(),
 });
 
 export async function POST(request: Request) {
