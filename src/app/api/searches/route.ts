@@ -11,6 +11,7 @@ const SearchRequestSchema = z.object({
     .union([z.literal(20), z.literal(50), z.literal(100), z.enum(['20', '50', '100'])])
     .transform((v) => (typeof v === 'string' ? parseInt(v, 10) : v) as 20 | 50 | 100),
   onlyNoWebsite: z.boolean().optional().default(false),
+  provider: z.enum(['osm', 'google', 'companies_house']).optional(),
 });
 
 export async function POST(request: Request) {
@@ -25,8 +26,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const { niche, location, radiusMiles, maxResults, onlyNoWebsite } = parsed.data;
-    const provider = getPlacesProvider();
+    const { niche, location, radiusMiles, maxResults, onlyNoWebsite, provider: reqProvider } = parsed.data;
+    const provider = getPlacesProvider(reqProvider);
 
     // 1. Discover places via configured PlacesProvider (OSM default, Google, or Apify)
     const discoveredLeads = await provider.search({

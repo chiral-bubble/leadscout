@@ -164,6 +164,10 @@ out center tags ${Math.min(maxResults * 2, 150)};
         tags.url ||
         tags['contact:facebook'] ||
         tags.facebook ||
+        tags['contact:instagram'] ||
+        tags.instagram ||
+        tags['contact:twitter'] ||
+        tags.twitter ||
         null;
       const classification = classifyWebsite(websiteUrl);
       const hasWebsite = classification.has_website;
@@ -269,12 +273,111 @@ out center tags ${Math.min(maxResults * 2, 150)};
   node["craft"="photographer"](around:${radiusMeters},${lat},${lon});`;
     }
 
-    // Generic fallback for any other niche
+    if (n.includes('electric')) {
+      return `
+  node["craft"="electrician"](around:${radiusMeters},${lat},${lon});
+  way["craft"="electrician"](around:${radiusMeters},${lat},${lon});
+  node["office"="electrician"](around:${radiusMeters},${lat},${lon});`;
+    }
+
+    if (n.includes('paint') || n.includes('decorat')) {
+      return `
+  node["craft"="painter"](around:${radiusMeters},${lat},${lon});
+  way["craft"="painter"](around:${radiusMeters},${lat},${lon});
+  node["shop"="paint"](around:${radiusMeters},${lat},${lon});`;
+    }
+
+    if (n.includes('build') || n.includes('construct')) {
+      return `
+  node["craft"="builder"](around:${radiusMeters},${lat},${lon});
+  way["craft"="builder"](around:${radiusMeters},${lat},${lon});
+  node["office"="construction_company"](around:${radiusMeters},${lat},${lon});
+  way["office"="construction_company"](around:${radiusMeters},${lat},${lon});`;
+    }
+
+    if (n.includes('roof')) {
+      return `
+  node["craft"="roofer"](around:${radiusMeters},${lat},${lon});
+  way["craft"="roofer"](around:${radiusMeters},${lat},${lon});`;
+    }
+
+    if (n.includes('carpent') || n.includes('joiner')) {
+      return `
+  node["craft"="carpenter"](around:${radiusMeters},${lat},${lon});
+  way["craft"="carpenter"](around:${radiusMeters},${lat},${lon});
+  node["craft"="joiner"](around:${radiusMeters},${lat},${lon});`;
+    }
+
+    if (n.includes('window') || n.includes('glaz')) {
+      return `
+  node["craft"="glazier"](around:${radiusMeters},${lat},${lon});
+  way["craft"="glazier"](around:${radiusMeters},${lat},${lon});
+  node["craft"="window_construction"](around:${radiusMeters},${lat},${lon});`;
+    }
+
+    if (n.includes('garden') || n.includes('landscap')) {
+      return `
+  node["craft"="gardener"](around:${radiusMeters},${lat},${lon});
+  way["craft"="gardener"](around:${radiusMeters},${lat},${lon});
+  node["craft"="landscaper"](around:${radiusMeters},${lat},${lon});`;
+    }
+
+    if (n.includes('mechan') || n.includes('garage') || n.includes('car repair') || n.includes('mot')) {
+      return `
+  node["shop"="car_repair"](around:${radiusMeters},${lat},${lon});
+  way["shop"="car_repair"](around:${radiusMeters},${lat},${lon});
+  node["craft"="car_repair"](around:${radiusMeters},${lat},${lon});`;
+    }
+
+    if (n.includes('clean')) {
+      return `
+  node["craft"="cleaning"](around:${radiusMeters},${lat},${lon});
+  node["office"="cleaning"](around:${radiusMeters},${lat},${lon});
+  node["shop"="dry_cleaning"](around:${radiusMeters},${lat},${lon});`;
+    }
+
+    if (n.includes('beauty') || n.includes('nail') || n.includes('salon') || n.includes('spa')) {
+      return `
+  node["shop"="beauty"](around:${radiusMeters},${lat},${lon});
+  way["shop"="beauty"](around:${radiusMeters},${lat},${lon});
+  node["shop"="massage"](around:${radiusMeters},${lat},${lon});`;
+    }
+
+    if (n.includes('vet')) {
+      return `
+  node["amenity"="veterinary"](around:${radiusMeters},${lat},${lon});
+  way["amenity"="veterinary"](around:${radiusMeters},${lat},${lon});`;
+    }
+
+    if (n.includes('physio') || n.includes('chiro') || n.includes('clinic')) {
+      return `
+  node["healthcare"="physiotherapist"](around:${radiusMeters},${lat},${lon});
+  node["amenity"="clinic"](around:${radiusMeters},${lat},${lon});
+  way["amenity"="clinic"](around:${radiusMeters},${lat},${lon});`;
+    }
+
+    if (n.includes('locksmith')) {
+      return `
+  node["craft"="locksmith"](around:${radiusMeters},${lat},${lon});
+  way["craft"="locksmith"](around:${radiusMeters},${lat},${lon});`;
+    }
+
+    if (n.includes('tiler') || n.includes('plaster') || n.includes('floor')) {
+      return `
+  node["craft"="tiler"](around:${radiusMeters},${lat},${lon});
+  node["craft"="plasterer"](around:${radiusMeters},${lat},${lon});
+  node["craft"="floorer"](around:${radiusMeters},${lat},${lon});`;
+    }
+
+    // Generic singularized case-insensitive fallback for any other niche
+    const singular = n.replace(/s$/, '');
     return `
-  node["shop"~"${n}"](around:${radiusMeters},${lat},${lon});
-  way["shop"~"${n}"](around:${radiusMeters},${lat},${lon});
-  node["amenity"~"${n}"](around:${radiusMeters},${lat},${lon});
-  node["craft"~"${n}"](around:${radiusMeters},${lat},${lon});
-  node["office"~"${n}"](around:${radiusMeters},${lat},${lon});`;
+  node["shop"~"${singular}",i](around:${radiusMeters},${lat},${lon});
+  way["shop"~"${singular}",i](around:${radiusMeters},${lat},${lon});
+  node["amenity"~"${singular}",i](around:${radiusMeters},${lat},${lon});
+  node["craft"~"${singular}",i](around:${radiusMeters},${lat},${lon});
+  way["craft"~"${singular}",i](around:${radiusMeters},${lat},${lon});
+  node["office"~"${singular}",i](around:${radiusMeters},${lat},${lon});
+  node["healthcare"~"${singular}",i](around:${radiusMeters},${lat},${lon});`;
   }
 }

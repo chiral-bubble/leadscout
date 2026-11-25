@@ -59,6 +59,7 @@ export default function DiscoveryPage() {
     radiusMiles: number;
     maxResults: 20 | 50 | 100;
     onlyNoWebsite?: boolean;
+    provider?: 'osm' | 'google' | 'companies_house';
   }) => {
     setIsLoading(true);
     setError(null);

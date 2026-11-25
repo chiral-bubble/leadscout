@@ -11,19 +11,23 @@ interface SearchFormProps {
     radiusMiles: number;
     maxResults: 20 | 50 | 100;
     onlyNoWebsite?: boolean;
+    provider?: 'osm' | 'google' | 'companies_house';
   }) => Promise<void>;
   isLoading: boolean;
 }
 
 const NICHE_SUGGESTIONS = [
-  'dentists',
   'barbers',
+  'electricians',
   'plumbers',
+  'painters',
+  'builders',
+  'mechanics',
+  'beauty salons',
+  'dentists',
   'restaurants',
   'estate agents',
-  'gyms',
   'accountants',
-  'wedding photographers',
 ];
 
 export function SearchForm({ onSearch, isLoading }: SearchFormProps) {
@@ -32,8 +36,9 @@ export function SearchForm({ onSearch, isLoading }: SearchFormProps) {
   const [radiusMiles, setRadiusMiles] = useState(10);
   const [maxResults, setMaxResults] = useState<20 | 50 | 100>(20);
   const [onlyNoWebsite, setOnlyNoWebsite] = useState(false);
+  const [provider, setProvider] = useState<'osm' | 'google' | 'companies_house'>('osm');
 
-  const estimatedCost = estimateSearchCostGBP(maxResults);
+  const estimatedCost = provider === 'google' ? estimateSearchCostGBP(maxResults) : 0;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,6 +49,7 @@ export function SearchForm({ onSearch, isLoading }: SearchFormProps) {
       radiusMiles,
       maxResults,
       onlyNoWebsite,
+      provider,
     });
   };
 
@@ -179,18 +185,44 @@ export function SearchForm({ onSearch, isLoading }: SearchFormProps) {
           </div>
         </div>
 
-        {/* Filter: Only businesses with no website tag */}
-        <div className="flex items-center gap-2 pt-1">
-          <input
-            type="checkbox"
-            id="onlyNoWebsite"
-            checked={onlyNoWebsite}
-            onChange={(e) => setOnlyNoWebsite(e.target.checked)}
-            className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500 cursor-pointer"
-          />
-          <label htmlFor="onlyNoWebsite" className="text-xs font-semibold text-slate-700 cursor-pointer">
-            Only businesses with no website tag (Prime targets for new websites)
-          </label>
+        {/* Filter & Discovery Source */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="onlyNoWebsite"
+              checked={onlyNoWebsite}
+              onChange={(e) => setOnlyNoWebsite(e.target.checked)}
+              className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500 cursor-pointer"
+            />
+            <label htmlFor="onlyNoWebsite" className="text-xs font-semibold text-slate-700 cursor-pointer">
+              Only businesses with no website tag (Prime targets for new websites)
+            </label>
+          </div>
+
+          <div className="flex items-center gap-1.5 text-xs">
+            <span className="font-semibold text-slate-600">Source:</span>
+            <div className="inline-flex bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+              {[
+                { id: 'osm', label: 'Free (OSM)' },
+                { id: 'google', label: 'Google Maps' },
+                { id: 'companies_house', label: 'New Companies' },
+              ].map((src) => (
+                <button
+                  key={src.id}
+                  type="button"
+                  onClick={() => setProvider(src.id as 'osm' | 'google' | 'companies_house')}
+                  className={`px-2.5 py-1 rounded-md font-medium transition ${
+                    provider === src.id
+                      ? 'bg-indigo-600 text-white shadow-2xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  {src.label}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Submit Bar */}
@@ -207,7 +239,7 @@ export function SearchForm({ onSearch, isLoading }: SearchFormProps) {
             {isLoading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Searching Google Places...
+                Searching...
               </>
             ) : (
               <>
