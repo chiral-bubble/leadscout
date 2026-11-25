@@ -93,7 +93,7 @@ export async function generatePitch(
 
   // 3. Channel Gating Rules Enforcement
   const audit = customAudit !== undefined ? customAudit : (await getAuditForLead(leadId));
-  const emailCandidates = audit?.contact_candidates?.emails || [];
+  const emailCandidates = audit?.contact_candidates?.emails || (lead.email ? [lead.email] : []);
   const hasPublishedEmail = emailCandidates.length > 0;
   const isCorporate = (analysis.outreach_class || lead.outreach_class) === 'corporate';
 

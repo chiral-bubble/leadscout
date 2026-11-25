@@ -846,7 +846,8 @@ export function ResultsTable({ leads, searchTitle, isMockData }: ResultsTablePro
                       <div>
                         {(() => {
                           const hasPhone = Boolean(lead.phone_e164 || lead.phone_raw);
-                          const hasEmail = Boolean(audit?.contact_candidates?.emails?.length);
+                          const displayEmail = audit?.contact_candidates?.emails?.[0] || lead.email || null;
+                          const hasEmail = Boolean(displayEmail);
                           const hasRoute = lead.has_contact_route !== false && (hasPhone || hasEmail);
 
                           if (!hasRoute) {
@@ -859,15 +860,15 @@ export function ResultsTable({ leads, searchTitle, isMockData }: ResultsTablePro
 
                           return (
                             <>
-                              {getPhoneBadge(lead.phone_type, lead.whatsapp_likely)}
+                              {hasPhone && getPhoneBadge(lead.phone_type, lead.whatsapp_likely)}
                               {lead.phone_e164 && (
                                 <div className="text-[11px] font-mono text-slate-500 mt-1">
                                   {lead.phone_e164}
                                 </div>
                               )}
                               {hasEmail && (
-                                <div className="text-[10px] font-mono text-indigo-600 mt-0.5 truncate max-w-[150px]" title={audit!.contact_candidates.emails.join(', ')}>
-                                  ✉ {audit!.contact_candidates.emails[0]}
+                                <div className="text-[10px] font-mono text-indigo-600 mt-0.5 truncate max-w-[150px]" title={audit?.contact_candidates?.emails?.join(', ') || displayEmail || ''}>
+                                  ✉ {displayEmail}
                                 </div>
                               )}
                             </>

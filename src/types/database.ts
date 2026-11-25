@@ -73,6 +73,7 @@ export interface Lead {
   phone_e164?: string | null;
   phone_type: PhoneType;
   whatsapp_likely: boolean;
+  email?: string | null;
   website?: string | null;
   has_website: boolean;
   website_type: WebsiteType;

@@ -156,8 +156,15 @@ out center tags ${Math.min(maxResults * 2, 150)};
 
       const rawPhone = tags.phone || tags['contact:phone'] || tags['phone:mobile'] || null;
       const phoneInfo = normalizeUKPhone(rawPhone);
+      const rawEmail = tags.email || tags['contact:email'] || null;
 
-      const websiteUrl = tags.website || tags['contact:website'] || tags.url || null;
+      const websiteUrl =
+        tags.website ||
+        tags['contact:website'] ||
+        tags.url ||
+        tags['contact:facebook'] ||
+        tags.facebook ||
+        null;
       const classification = classifyWebsite(websiteUrl);
       const hasWebsite = classification.has_website;
 
@@ -166,10 +173,11 @@ out center tags ${Math.min(maxResults * 2, 150)};
         continue;
       }
 
-      const hasContactRoute = Boolean(rawPhone || phoneInfo.phone_e164);
+      const hasContactRoute = Boolean(rawPhone || phoneInfo.phone_e164 || rawEmail);
 
       leads.push({
         place_id: `osm-${elem.type}-${elem.id}`,
+        source: 'osm',
         name: tags.name,
         address,
         postcode,
@@ -177,6 +185,7 @@ out center tags ${Math.min(maxResults * 2, 150)};
         phone_e164: phoneInfo.phone_e164,
         phone_type: phoneInfo.phone_type,
         whatsapp_likely: phoneInfo.whatsapp_likely,
+        email: rawEmail,
         website: websiteUrl,
         has_website: hasWebsite,
         website_type: classification.website_type,
