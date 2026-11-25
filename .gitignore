@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing & Cache
+coverage/
+.cache/
+
+# Next.js build
+.next/
+out/
+build/
+dist/
+
+# Environment files
+.env*
+!.env.example
+
+# Playwright & Screenshots
+screenshots/
+test-results/
+playwright-report/
+
+# Logs & temp
+*.log
+*.db
+leadscout.db
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.turbo/
+.DS_Store
+*.local
