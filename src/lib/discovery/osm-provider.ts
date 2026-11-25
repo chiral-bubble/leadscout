@@ -63,6 +63,49 @@ export class OsmProvider implements PlacesProvider {
   async search(params: PlacesSearchParams): Promise<Omit<Lead, 'id' | 'created_at' | 'updated_at'>[]> {
     const { niche, location, radiusMiles, maxResults, onlyNoWebsite } = params;
 
+    // Support comma-separated multi-town search (capped at 5 towns per request to stay within serverless timeout)
+    const locations = location
+      .split(',')
+      .map((l) => l.trim())
+      .filter(Boolean)
+      .slice(0, 5);
+
+    const seenPlaceIds = new Set<string>();
+    const allLeads: Omit<Lead, 'id' | 'created_at' | 'updated_at'>[] = [];
+
+    for (const singleLocation of locations) {
+      const townLeads = await this.searchSingleLocation({
+        niche,
+        location: singleLocation,
+        radiusMiles,
+        maxResults,
+        onlyNoWebsite,
+      });
+
+      for (const lead of townLeads) {
+        if (!seenPlaceIds.has(lead.place_id)) {
+          seenPlaceIds.add(lead.place_id);
+          allLeads.push(lead);
+        }
+      }
+
+      if (allLeads.length >= maxResults) break;
+    }
+
+    // Sort: actionable leads first, then by website_type
+    allLeads.sort((a, b) => {
+      const aRoute = a.has_contact_route ? 1 : 0;
+      const bRoute = b.has_contact_route ? 1 : 0;
+      if (aRoute !== bRoute) return bRoute - aRoute;
+      return 0;
+    });
+
+    return allLeads.slice(0, maxResults);
+  }
+
+  private async searchSingleLocation(params: PlacesSearchParams): Promise<Omit<Lead, 'id' | 'created_at' | 'updated_at'>[]> {
+    const { niche, location, radiusMiles, maxResults, onlyNoWebsite } = params;
+
     // 1. Geocode location using Nominatim (max 1 req/sec)
     const geoUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
       `${location}, UK`
@@ -79,7 +122,7 @@ export class OsmProvider implements PlacesProvider {
     }
 
     const { lat, lon } = geoData[0];
-    const radiusMeters = Math.min(Math.round(radiusMiles * 1609.34), 32000); // 1-20 miles to meters
+    const radiusMeters = Math.min(Math.round(radiusMiles * 1609.34), 80000); // up to 50 miles
 
     // 2. Build Overpass API query for the specified niche
     const filterClauses = this.buildNicheFilters(niche, radiusMeters, lat, lon);
@@ -89,7 +132,7 @@ export class OsmProvider implements PlacesProvider {
 (
 ${filterClauses}
 );
-out center tags ${Math.min(maxResults * 2, 150)};
+out center tags ${Math.min(maxResults * 2, 400)};
 `;
 
     // 3. Query Overpass API with redundant mirrors, 25s timeout and 24h query caching (Stage 5A-1 Requirement 11)
@@ -218,6 +261,15 @@ out center tags ${Math.min(maxResults * 2, 150)};
 
   private buildNicheFilters(niche: string, radiusMeters: number, lat: string, lon: string): string {
     const n = niche.toLowerCase().trim();
+
+    if (n === 'all trades' || n === 'all' || n === 'trades') {
+      return `
+  node["craft"~"^(electrician|plumber|painter|builder|roofer|carpenter|joiner|glazier|gardener|landscaper|locksmith|tiler|plasterer|floorer|car_repair)$"](around:${radiusMeters},${lat},${lon});
+  way["craft"~"^(electrician|plumber|painter|builder|roofer|carpenter|joiner|glazier|gardener|landscaper|locksmith|tiler|plasterer|floorer|car_repair)$"](around:${radiusMeters},${lat},${lon});
+  node["shop"~"^(car_repair|hairdresser|barber|beauty)$"](around:${radiusMeters},${lat},${lon});
+  way["shop"~"^(car_repair|hairdresser|barber|beauty)$"](around:${radiusMeters},${lat},${lon});
+  node["office"~"^(construction_company|cleaning)$"](around:${radiusMeters},${lat},${lon});`;
+    }
 
     if (n.includes('barber') || n.includes('hair')) {
       return `

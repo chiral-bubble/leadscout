@@ -6,10 +6,10 @@ import { saveSearchAndLeads, getSearchHistory } from '@/lib/services/leads-servi
 const SearchRequestSchema = z.object({
   niche: z.string().min(1, 'Niche is required').trim(),
   location: z.string().min(1, 'UK location is required').trim(),
-  radiusMiles: z.coerce.number().min(1).max(20).default(10),
+  radiusMiles: z.coerce.number().min(1).max(50).default(10),
   maxResults: z
-    .union([z.literal(20), z.literal(50), z.literal(100), z.enum(['20', '50', '100'])])
-    .transform((v) => (typeof v === 'string' ? parseInt(v, 10) : v) as 20 | 50 | 100),
+    .union([z.literal(20), z.literal(50), z.literal(100), z.literal(250), z.enum(['20', '50', '100', '250'])])
+    .transform((v) => (typeof v === 'string' ? parseInt(v, 10) : v) as 20 | 50 | 100 | 250),
   onlyNoWebsite: z.boolean().optional().default(false),
   provider: z.enum(['osm', 'companies_house']).optional(),
 });

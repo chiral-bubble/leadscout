@@ -9,7 +9,7 @@ interface SearchFormProps {
     niche: string;
     location: string;
     radiusMiles: number;
-    maxResults: 20 | 50 | 100;
+    maxResults: 20 | 50 | 100 | 250;
     onlyNoWebsite?: boolean;
     provider?: 'osm' | 'companies_house';
   }) => Promise<void>;
@@ -17,6 +17,7 @@ interface SearchFormProps {
 }
 
 const NICHE_SUGGESTIONS = [
+  'all trades',
   'barbers',
   'electricians',
   'plumbers',
@@ -30,11 +31,19 @@ const NICHE_SUGGESTIONS = [
   'accountants',
 ];
 
+const REGION_PRESETS = [
+  { label: 'South East', towns: 'Reading, Newbury, Basingstoke, Oxford, Guildford' },
+  { label: 'North West', towns: 'Manchester, Liverpool, Preston, Chester, Bolton' },
+  { label: 'Midlands', towns: 'Birmingham, Coventry, Nottingham, Derby, Leicester' },
+  { label: 'Yorkshire', towns: 'Leeds, Sheffield, York, Bradford, Harrogate' },
+  { label: 'South West', towns: 'Bristol, Bath, Swindon, Exeter, Cheltenham' },
+];
+
 export function SearchForm({ onSearch, isLoading }: SearchFormProps) {
-  const [niche, setNiche] = useState('barbers');
+  const [niche, setNiche] = useState('all trades');
   const [location, setLocation] = useState('Reading');
-  const [radiusMiles, setRadiusMiles] = useState(10);
-  const [maxResults, setMaxResults] = useState<20 | 50 | 100>(20);
+  const [radiusMiles, setRadiusMiles] = useState(15);
+  const [maxResults, setMaxResults] = useState<20 | 50 | 100 | 250>(50);
   const [onlyNoWebsite, setOnlyNoWebsite] = useState(false);
   const [provider, setProvider] = useState<'osm' | 'companies_house'>('osm');
 
@@ -84,10 +93,10 @@ export function SearchForm({ onSearch, isLoading }: SearchFormProps) {
             </div>
           </div>
 
-          {/* UK Location */}
+          {/* UK Location (Single or Multi-Town) */}
           <div className="lg:col-span-1">
             <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-              UK Location
+              UK Towns (up to 5, comma-separated)
             </label>
             <div className="relative">
               <MapPin className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
@@ -96,13 +105,13 @@ export function SearchForm({ onSearch, isLoading }: SearchFormProps) {
                 required
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                placeholder="City, town or postcode (e.g. Leeds, BS1)"
+                placeholder="e.g. Reading, Newbury, Oxford"
                 className="w-full pl-9 pr-3.5 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white text-slate-900 transition"
               />
             </div>
           </div>
 
-          {/* Radius (1-20 miles) */}
+          {/* Radius (1-50 miles) */}
           <div className="lg:col-span-1">
             <div className="flex justify-between items-center mb-1.5">
               <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
@@ -114,7 +123,7 @@ export function SearchForm({ onSearch, isLoading }: SearchFormProps) {
               <input
                 type="range"
                 min="1"
-                max="20"
+                max="50"
                 step="1"
                 value={radiusMiles}
                 onChange={(e) => setRadiusMiles(parseInt(e.target.value, 10))}
@@ -122,8 +131,8 @@ export function SearchForm({ onSearch, isLoading }: SearchFormProps) {
               />
               <div className="flex justify-between text-[10px] text-slate-400 mt-1">
                 <span>1 mi</span>
-                <span>10 mi</span>
-                <span>20 mi</span>
+                <span>25 mi</span>
+                <span>50 mi</span>
               </div>
             </div>
           </div>
@@ -133,8 +142,8 @@ export function SearchForm({ onSearch, isLoading }: SearchFormProps) {
             <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
               Max Results
             </label>
-            <div className="grid grid-cols-3 gap-2">
-              {([20, 50, 100] as const).map((num) => (
+            <div className="grid grid-cols-4 gap-1.5">
+              {([20, 50, 100, 250] as const).map((num) => (
                 <button
                   key={num}
                   type="button"
@@ -152,27 +161,52 @@ export function SearchForm({ onSearch, isLoading }: SearchFormProps) {
           </div>
         </div>
 
-        {/* Niche Suggestions */}
-        <div>
-          <div className="flex items-center gap-1.5 text-xs text-slate-500 mb-2">
-            <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
-            <span>Popular UK SME niches:</span>
+        {/* Niche & Region Presets */}
+        <div className="space-y-2.5">
+          <div>
+            <div className="flex items-center gap-1.5 text-xs text-slate-500 mb-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
+              <span>Popular UK SME niches:</span>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {NICHE_SUGGESTIONS.map((suggestion) => (
+                <button
+                  key={suggestion}
+                  type="button"
+                  onClick={() => setNiche(suggestion)}
+                  className={`text-xs px-2.5 py-1 rounded-full border transition ${
+                    niche.toLowerCase() === suggestion
+                      ? 'bg-indigo-50 border-indigo-300 text-indigo-700 font-medium'
+                      : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                  }`}
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="flex flex-wrap gap-1.5">
-            {NICHE_SUGGESTIONS.map((suggestion) => (
-              <button
-                key={suggestion}
-                type="button"
-                onClick={() => setNiche(suggestion)}
-                className={`text-xs px-2.5 py-1 rounded-full border transition ${
-                  niche.toLowerCase() === suggestion
-                    ? 'bg-indigo-50 border-indigo-300 text-indigo-700 font-medium'
-                    : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
-                }`}
-              >
-                {suggestion}
-              </button>
-            ))}
+
+          <div>
+            <div className="flex items-center gap-1.5 text-xs text-slate-500 mb-1.5">
+              <MapPin className="w-3.5 h-3.5 text-indigo-500" />
+              <span>Multi-town UK region presets:</span>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {REGION_PRESETS.map((reg) => (
+                <button
+                  key={reg.label}
+                  type="button"
+                  onClick={() => setLocation(reg.towns)}
+                  className={`text-xs px-2.5 py-1 rounded-full border transition ${
+                    location === reg.towns
+                      ? 'bg-indigo-50 border-indigo-300 text-indigo-700 font-medium'
+                      : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                  }`}
+                >
+                  {reg.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 

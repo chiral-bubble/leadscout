@@ -57,7 +57,7 @@ export default function DiscoveryPage() {
     niche: string;
     location: string;
     radiusMiles: number;
-    maxResults: 20 | 50 | 100;
+    maxResults: 20 | 50 | 100 | 250;
     onlyNoWebsite?: boolean;
     provider?: 'osm' | 'companies_house';
   }) => {
