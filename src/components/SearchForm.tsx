@@ -11,7 +11,7 @@ interface SearchFormProps {
     radiusMiles: number;
     maxResults: 20 | 50 | 100;
     onlyNoWebsite?: boolean;
-    provider?: 'osm' | 'google' | 'companies_house';
+    provider?: 'osm' | 'companies_house';
   }) => Promise<void>;
   isLoading: boolean;
 }
@@ -36,9 +36,7 @@ export function SearchForm({ onSearch, isLoading }: SearchFormProps) {
   const [radiusMiles, setRadiusMiles] = useState(10);
   const [maxResults, setMaxResults] = useState<20 | 50 | 100>(20);
   const [onlyNoWebsite, setOnlyNoWebsite] = useState(false);
-  const [provider, setProvider] = useState<'osm' | 'google' | 'companies_house'>('osm');
-
-  const estimatedCost = provider === 'google' ? estimateSearchCostGBP(maxResults) : 0;
+  const [provider, setProvider] = useState<'osm' | 'companies_house'>('osm');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,15 +60,8 @@ export function SearchForm({ onSearch, isLoading }: SearchFormProps) {
             Discover UK Leads
           </h2>
           <p className="text-sm text-slate-500">
-            Search Google Places across the UK to uncover businesses needing websites, booking systems, or redesigns.
+            Search across the UK using free OpenStreetMap data or newly registered UK companies.
           </p>
-        </div>
-
-        {/* Live Estimated Google API Cost */}
-        <div className="hidden sm:flex items-center gap-2 bg-slate-50 border border-slate-200 px-3.5 py-1.5 rounded-lg text-xs">
-          <Coins className="w-4 h-4 text-amber-600" />
-          <span className="text-slate-600">Est. Google API cost:</span>
-          <span className="font-semibold text-slate-900">{formatGBP(estimatedCost)}</span>
         </div>
       </div>
 
@@ -205,13 +196,12 @@ export function SearchForm({ onSearch, isLoading }: SearchFormProps) {
             <div className="inline-flex bg-slate-100 p-0.5 rounded-lg border border-slate-200">
               {[
                 { id: 'osm', label: 'Free (OSM)' },
-                { id: 'google', label: 'Google Maps' },
                 { id: 'companies_house', label: 'New Companies' },
               ].map((src) => (
                 <button
                   key={src.id}
                   type="button"
-                  onClick={() => setProvider(src.id as 'osm' | 'google' | 'companies_house')}
+                  onClick={() => setProvider(src.id as 'osm' | 'companies_house')}
                   className={`px-2.5 py-1 rounded-md font-medium transition ${
                     provider === src.id
                       ? 'bg-indigo-600 text-white shadow-2xs'

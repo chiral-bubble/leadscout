@@ -59,7 +59,7 @@ export default function DiscoveryPage() {
     radiusMiles: number;
     maxResults: 20 | 50 | 100;
     onlyNoWebsite?: boolean;
-    provider?: 'osm' | 'google' | 'companies_house';
+    provider?: 'osm' | 'companies_house';
   }) => {
     setIsLoading(true);
     setError(null);
@@ -75,7 +75,7 @@ export default function DiscoveryPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || 'Failed to complete Google Places search');
+        throw new Error(data.error || 'Failed to complete search');
       }
 
       setLeads(data.leads || []);
